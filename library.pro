@@ -1,6 +1,7 @@
 domains
 	i = integer
 	list = i*
+	listc = char*
 predicates
 	nondeterm member(i, list)
 	nondeterm length(list, i)
@@ -17,6 +18,8 @@ predicates
 	nondeterm pop_front(i, list, list)
 	nondeterm pop_back(list, list)
 	nondeterm pop_all(i, list, list)
+	nondeterm to_hex(char, i)
+	nondeterm to_m_base(i, i, listc, listc)
 clauses
 /*member*/
 	member(X, [X|_]).
@@ -85,3 +88,34 @@ clauses
 	pop_all(X, [H|T], [H|T1]):-
 		X <> H,
 		pop_all(X, T, T1).
+/*Turn integer to hex character*/
+	to_hex(H, X):-
+		X < 10,
+		NX = X + 48,
+		char_int(H, NX).
+	to_hex(H, X):-
+		X > 9,
+		NX = X + 55,
+		char_int(H, NX).
+
+/*****************************************************************/
+/******************Done*******************************************/
+
+/*Counter*/
+/*schet(M, S, Start, M, [], Result)*/
+	schet(M, S, Position, Calc, L, Result):-
+		push_back(Position, L, L1),
+		NPosition = (Position + S) mod M,
+		NCalc = Calc - 1,
+		NCalc > -1,
+		schet(M, S, NPosition, NCalc, L1, Result).
+	schet(_, _, _, 0, Result, Result):-!.
+/*Turn number to base M (list of characters)*/
+	to_m_base(M, Num, L, Result):-
+		Num <> 0,
+		A = (Num mod M),
+		to_hex(H, A),
+		push_front(H, L, L1),
+		NNum = Num div M,
+		to_m_base(M, NNum, L1, Result).
+	to_m_base(_, 0, L, L).
